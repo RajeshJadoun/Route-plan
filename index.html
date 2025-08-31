@@ -454,4 +454,468 @@
                     <div id="publicTransportSection" class="camera-section hidden">
                         <label>📸 Travel Ticket Photo:</label>
                         <br>
-                        <button class="camera-
+                        <button class="camera-btn" onclick="capturePhoto('ticket')">
+                            🎫 Capture Ticket
+                        </button>
+                        <br>
+                        <img id="ticketPreview" class="photo-preview hidden" alt="Ticket Preview">
+                    </div>
+
+                    <!-- Expense Form -->
+                    <div class="form-group">
+                        <label>💰 Expense Details:</label>
+                        <div class="expense-form">
+                            <div class="form-group">
+                                <label for="travelExpense">Travel (₹):</label>
+                                <input type="number" id="travelExpense" placeholder="0" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="foodExpense">Food (₹):</label>
+                                <input type="number" id="foodExpense" placeholder="0" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="stayExpense">Stay (₹):</label>
+                                <input type="number" id="stayExpense" placeholder="0" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="otherExpense">Other (₹):</label>
+                                <input type="number" id="otherExpense" placeholder="0" min="0" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="submit-btn" onclick="submitCheckout()" id="checkoutSubmitBtn">
+                        Submit Check-out
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            <div id="alertContainer"></div>
+        </div>
+    </div>
+
+    <!-- Hidden Camera Input -->
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let userCredential = null;
+        let currentPhotoType = null;
+        let transportMethod = null;
+        let capturedPhotos = {};
+
+        // Google Apps Script Web App URL
+        const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+
+        // Initialize Google Sign-In
+        window.addEventListener('load', function() {
+            // Initialize Google Sign-In
+            if (typeof google !== 'undefined') {
+                google.accounts.id.initialize({
+                    client_id: 'YOUR_GOOGLE_CLIENT_ID',
+                    callback: handleCredentialResponse
+                });
+            }
+        });
+
+        /**
+         * Handle Google Sign-In response
+         */
+        function handleCredentialResponse(response) {
+            showLoading('Verifying credentials...');
+            
+            userCredential = response.credential;
+            
+            // Decode JWT to get user info
+            try {
+                const payload = JSON.parse(atob(response.credential.split('.')[1]));
+                currentUser = {
+                    email: payload.email,
+                    name: payload.name,
+                    picture: payload.picture
+                };
+
+                // Verify with backend
+                verifyUserAuthorization();
+            } catch (error) {
+                showAlert('Login failed: Invalid token', 'error');
+                hideLoading();
+            }
+        }
+
+        /**
+         * Verify user authorization with backend
+         */
+        async function verifyUserAuthorization() {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getUserInfo&email=${currentUser.email}`);
+                const result = await response.json();
+
+                hideLoading();
+
+                if (result.status === 200) {
+                    // User is authorized
+                    currentUser.displayName = result.data.name || currentUser.name;
+                    currentUser.routePlan = result.data.routePlan;
+                    
+                    showMainApp();
+                    showAlert('Login successful! Welcome back.', 'success');
+                } else {
+                    showAlert('Access denied: You are not authorized to use this application.', 'error');
+                }
+            } catch (error) {
+                hideLoading();
+                showAlert('Login verification failed: ' + error.message, 'error');
+            }
+        }
+
+        /**
+         * Show main application
+         */
+        function showMainApp() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('appSection').classList.remove('hidden');
+            
+            // Update user info
+            document.getElementById('userName').textContent = currentUser.displayName;
+            document.getElementById('routePlanText').textContent = currentUser.routePlan;
+        }
+
+        /**
+         * Start check-in process
+         */
+        function startCheckin() {
+            hideAllForms();
+            document.getElementById('checkinForm').classList.remove('hidden');
+            
+            // Pre-fill route plan if available
+            if (currentUser.routePlan && currentUser.routePlan !== 'No Route Plan assigned.') {
+                document.getElementById('customRoutePlan').placeholder = `Current: ${currentUser.routePlan}`;
+            }
+        }
+
+        /**
+         * Start check-out process
+         */
+        function startCheckout() {
+            hideAllForms();
+            document.getElementById('checkoutForm').classList.remove('hidden');
+            transportMethod = null;
+            
+            // Reset transport selection
+            document.getElementById('localTransport').classList.remove('selected');
+            document.getElementById('publicTransport').classList.remove('selected');
+            document.getElementById('localVehicleSection').classList.add('hidden');
+            document.getElementById('publicTransportSection').classList.add('hidden');
+        }
+
+        /**
+         * Select transport method
+         */
+        function selectTransport(method) {
+            transportMethod = method;
+            
+            // Update UI
+            document.getElementById('localTransport').classList.remove('selected');
+            document.getElementById('publicTransport').classList.remove('selected');
+            document.getElementById('localVehicleSection').classList.add('hidden');
+            document.getElementById('publicTransportSection').classList.add('hidden');
+
+            if (method === 'local') {
+                document.getElementById('localTransport').classList.add('selected');
+                document.getElementById('localVehicleSection').classList.remove('hidden');
+            } else if (method === 'public') {
+                document.getElementById('publicTransport').classList.add('selected');
+                document.getElementById('publicTransportSection').classList.remove('hidden');
+            }
+        }
+
+        /**
+         * Capture photo using camera
+         */
+        function capturePhoto(type) {
+            currentPhotoType = type;
+            document.getElementById('cameraInput').click();
+        }
+
+        // Handle photo capture
+        document.getElementById('cameraInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Data = e.target.result;
+                    capturedPhotos[currentPhotoType] = base64Data;
+                    
+                    // Show preview
+                    const previewId = currentPhotoType + 'Preview';
+                    const previewImg = document.getElementById(previewId);
+                    if (previewImg) {
+                        previewImg.src = base64Data;
+                        previewImg.classList.remove('hidden');
+                    }
+                    
+                    showAlert(`📸 ${currentPhotoType} photo captured successfully!`, 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        /**
+         * Submit check-in data
+         */
+        async function submitCheckin() {
+            if (!capturedPhotos.meterIn) {
+                showAlert('Please capture meter reading photo first!', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('checkinSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading"></span> Submitting...';
+
+            try {
+                const customRoute = document.getElementById('customRoutePlan').value.trim();
+                const routePlan = customRoute || currentUser.routePlan;
+
+                const payload = {
+                    idToken: userCredential,
+                    action: 'checkin',
+                    payload: {
+                        name: currentUser.displayName,
+                        routePlan: routePlan,
+                        meterInPhoto: capturedPhotos.meterIn
+                    }
+                };
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.status === 200) {
+                    showAlert('✅ Check-in successful!', 'success');
+                    hideAllForms();
+                    
+                    // Reset form
+                    document.getElementById('customRoutePlan').value = '';
+                    capturedPhotos.meterIn = null;
+                    document.getElementById('meterInPreview').classList.add('hidden');
+                } else {
+                    showAlert('Check-in failed: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Check-in error: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Check-in';
+            }
+        }
+
+        /**
+         * Submit check-out data
+         */
+        async function submitCheckout() {
+            if (!transportMethod) {
+                showAlert('Please select transportation method!', 'error');
+                return;
+            }
+
+            if (transportMethod === 'local' && !capturedPhotos.meterOut) {
+                showAlert('Please capture meter out reading photo!', 'error');
+                return;
+            }
+
+            if (transportMethod === 'public' && !capturedPhotos.ticket) {
+                showAlert('Please capture ticket photo!', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('checkoutSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading"></span> Submitting...';
+
+            try {
+                const payload = {
+                    idToken: userCredential,
+                    action: 'checkout',
+                    payload: {
+                        name: currentUser.displayName,
+                        routePlan: currentUser.routePlan,
+                        meterOutPhoto: capturedPhotos.meterOut || '',
+                        ticketPhoto: capturedPhotos.ticket || '',
+                        travelExpense: document.getElementById('travelExpense').value || 0,
+                        foodExpense: document.getElementById('foodExpense').value || 0,
+                        stayExpense: document.getElementById('stayExpense').value || 0,
+                        otherExpense: document.getElementById('otherExpense').value || 0,
+                        transportMethod: transportMethod
+                    }
+                };
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.status === 200) {
+                    showAlert('✅ Check-out successful!', 'success');
+                    hideAllForms();
+                    resetCheckoutForm();
+                } else {
+                    showAlert('Check-out failed: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Check-out error: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Check-out';
+            }
+        }
+
+        /**
+         * Reset checkout form
+         */
+        function resetCheckoutForm() {
+            transportMethod = null;
+            capturedPhotos.meterOut = null;
+            capturedPhotos.ticket = null;
+            
+            document.getElementById('localTransport').classList.remove('selected');
+            document.getElementById('publicTransport').classList.remove('selected');
+            document.getElementById('localVehicleSection').classList.add('hidden');
+            document.getElementById('publicTransportSection').classList.add('hidden');
+            
+            document.getElementById('meterOutPreview').classList.add('hidden');
+            document.getElementById('ticketPreview').classList.add('hidden');
+            
+            // Reset expense fields
+            document.getElementById('travelExpense').value = '';
+            document.getElementById('foodExpense').value = '';
+            document.getElementById('stayExpense').value = '';
+            document.getElementById('otherExpense').value = '';
+        }
+
+        /**
+         * Hide all forms
+         */
+        function hideAllForms() {
+            document.getElementById('checkinForm').classList.add('hidden');
+            document.getElementById('checkoutForm').classList.add('hidden');
+        }
+
+        /**
+         * Logout function
+         */
+        function logout() {
+            if (typeof google !== 'undefined') {
+                google.accounts.id.disableAutoSelect();
+            }
+            
+            currentUser = null;
+            userCredential = null;
+            capturedPhotos = {};
+            
+            document.getElementById('appSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+            
+            hideAllForms();
+            clearAlerts();
+            
+            showAlert('Logged out successfully', 'success');
+        }
+
+        /**
+         * Show alert message
+         */
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+
+        /**
+         * Clear all alerts
+         */
+        function clearAlerts() {
+            document.getElementById('alertContainer').innerHTML = '';
+        }
+
+        /**
+         * Show loading state
+         */
+        function showLoading(message = 'Loading...') {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `
+                <div class="alert" style="background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb;">
+                    <span class="loading"></span> ${message}
+                </div>
+            `;
+        }
+
+        /**
+         * Hide loading state
+         */
+        function hideLoading() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                if (alert.textContent.includes('Loading') || alert.textContent.includes('Verifying')) {
+                    alert.remove();
+                }
+            });
+        }
+
+        /**
+         * Check if user is on mobile device
+         */
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        /**
+         * Initialize app on load
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add mobile-specific enhancements
+            if (isMobileDevice()) {
+                document.body.style.fontSize = '16px'; // Prevent zoom on input focus
+            }
+
+            // Add service worker for offline capability (optional)
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(function(error) {
+                    console.log('Service Worker registration failed:', error);
+                });
+            }
+        });
+
+        // Prevent form submission on Enter key (mobile keyboards)
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && event.target.tagName === 'INPUT') {
+                event.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
