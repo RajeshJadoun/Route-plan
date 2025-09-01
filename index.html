@@ -353,7 +353,6 @@
         </div>
 
         <div class="content">
-            <!-- Login Section -->
             <div id="loginSection" class="login-section">
                 <h2>🔐 Login with Google</h2>
                 <p style="margin: 20px 0; color: #666;">Please login with your authorized Gmail account</p>
@@ -374,7 +373,6 @@
                 </div>
             </div>
 
-            <!-- Main App Section -->
             <div id="appSection" class="hidden">
                 <div class="user-info">
                     <div class="welcome-text">
@@ -397,7 +395,6 @@
                     </button>
                 </div>
 
-                <!-- Check-in Form -->
                 <div id="checkinForm" class="form-section hidden">
                     <h3>🟢 Check-in Process</h3>
                     
@@ -421,7 +418,6 @@
                     </button>
                 </div>
 
-                <!-- Check-out Form -->
                 <div id="checkoutForm" class="form-section hidden">
                     <h3>🔴 Check-out Process</h3>
                     
@@ -439,7 +435,6 @@
                         </div>
                     </div>
 
-                    <!-- Local Vehicle Photos -->
                     <div id="localVehicleSection" class="camera-section hidden">
                         <label>📸 Meter Out Reading:</label>
                         <br>
@@ -450,7 +445,6 @@
                         <img id="meterOutPreview" class="photo-preview hidden" alt="Meter Out Preview">
                     </div>
 
-                    <!-- Public Transport Photos -->
                     <div id="publicTransportSection" class="camera-section hidden">
                         <label>📸 Travel Ticket Photo:</label>
                         <br>
@@ -461,7 +455,6 @@
                         <img id="ticketPreview" class="photo-preview hidden" alt="Ticket Preview">
                     </div>
 
-                    <!-- Expense Form -->
                     <div class="form-group">
                         <label>💰 Expense Details:</label>
                         <div class="expense-form">
@@ -490,45 +483,42 @@
                 </div>
             </div>
 
-            <!-- Alert Messages -->
             <div id="alertContainer"></div>
         </div>
     </div>
 
-    <!-- Hidden Camera Input -->
     <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
 
     <script>
-        // Global variables
+        // Global variables (वैश्विक चर)
         let currentUser = null;
         let userCredential = null;
         let currentPhotoType = null;
         let transportMethod = null;
         let capturedPhotos = {};
 
-        // Google Apps Script Web App URL
+        // Google Apps Script Web App URL (Google Apps Script Web App URL)
         const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
 
-        // Initialize Google Sign-In
+        // Initialize Google Sign-In (Google साइन-इन शुरू करें)
         window.addEventListener('load', function() {
-            // Initialize Google Sign-In
             if (typeof google !== 'undefined') {
                 google.accounts.id.initialize({
-                    client_id: 'YOUR_GOOGLE_CLIENT_ID',
+                    client_id: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your Client ID (इसे अपनी Client ID से बदलें)
                     callback: handleCredentialResponse
                 });
             }
         });
 
         /**
-         * Handle Google Sign-In response
+         * Handle Google Sign-In response (Google साइन-इन प्रतिक्रिया को संभालें)
          */
         function handleCredentialResponse(response) {
             showLoading('Verifying credentials...');
             
             userCredential = response.credential;
             
-            // Decode JWT to get user info
+            // Decode JWT to get user info (उपयोगकर्ता की जानकारी पाने के लिए JWT को डिकोड करें)
             try {
                 const payload = JSON.parse(atob(response.credential.split('.')[1]));
                 currentUser = {
@@ -537,7 +527,7 @@
                     picture: payload.picture
                 };
 
-                // Verify with backend
+                // Verify with backend (बैकएंड के साथ सत्यापित करें)
                 verifyUserAuthorization();
             } catch (error) {
                 showAlert('Login failed: Invalid token', 'error');
@@ -546,7 +536,7 @@
         }
 
         /**
-         * Verify user authorization with backend
+         * Verify user authorization with backend (बैकएंड के साथ उपयोगकर्ता प्राधिकरण को सत्यापित करें)
          */
         async function verifyUserAuthorization() {
             try {
@@ -556,7 +546,7 @@
                 hideLoading();
 
                 if (result.status === 200) {
-                    // User is authorized
+                    // User is authorized (उपयोगकर्ता अधिकृत है)
                     currentUser.displayName = result.data.name || currentUser.name;
                     currentUser.routePlan = result.data.routePlan;
                     
@@ -572,39 +562,39 @@
         }
 
         /**
-         * Show main application
+         * Show main application (मुख्य एप्लिकेशन दिखाएं)
          */
         function showMainApp() {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('appSection').classList.remove('hidden');
             
-            // Update user info
+            // Update user info (उपयोगकर्ता की जानकारी अपडेट करें)
             document.getElementById('userName').textContent = currentUser.displayName;
             document.getElementById('routePlanText').textContent = currentUser.routePlan;
         }
 
         /**
-         * Start check-in process
+         * Start check-in process (चेक-इन प्रक्रिया शुरू करें)
          */
         function startCheckin() {
             hideAllForms();
             document.getElementById('checkinForm').classList.remove('hidden');
             
-            // Pre-fill route plan if available
+            // Pre-fill route plan if available (यदि उपलब्ध हो तो रूट प्लान पहले से भरें)
             if (currentUser.routePlan && currentUser.routePlan !== 'No Route Plan assigned.') {
                 document.getElementById('customRoutePlan').placeholder = `Current: ${currentUser.routePlan}`;
             }
         }
 
         /**
-         * Start check-out process
+         * Start check-out process (चेक-आउट प्रक्रिया शुरू करें)
          */
         function startCheckout() {
             hideAllForms();
             document.getElementById('checkoutForm').classList.remove('hidden');
             transportMethod = null;
             
-            // Reset transport selection
+            // Reset transport selection (परिवहन चयन रीसेट करें)
             document.getElementById('localTransport').classList.remove('selected');
             document.getElementById('publicTransport').classList.remove('selected');
             document.getElementById('localVehicleSection').classList.add('hidden');
@@ -612,12 +602,12 @@
         }
 
         /**
-         * Select transport method
+         * Select transport method (परिवहन विधि चुनें)
          */
         function selectTransport(method) {
             transportMethod = method;
             
-            // Update UI
+            // Update UI (UI अपडेट करें)
             document.getElementById('localTransport').classList.remove('selected');
             document.getElementById('publicTransport').classList.remove('selected');
             document.getElementById('localVehicleSection').classList.add('hidden');
@@ -633,14 +623,14 @@
         }
 
         /**
-         * Capture photo using camera
+         * Capture photo using camera (कैमरा का उपयोग करके फोटो कैप्चर करें)
          */
         function capturePhoto(type) {
             currentPhotoType = type;
             document.getElementById('cameraInput').click();
         }
 
-        // Handle photo capture
+        // Handle photo capture (फोटो कैप्चर को संभालें)
         document.getElementById('cameraInput').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
@@ -649,7 +639,7 @@
                     const base64Data = e.target.result;
                     capturedPhotos[currentPhotoType] = base64Data;
                     
-                    // Show preview
+                    // Show preview (पूर्वावलोकन दिखाएं)
                     const previewId = currentPhotoType + 'Preview';
                     const previewImg = document.getElementById(previewId);
                     if (previewImg) {
@@ -664,7 +654,7 @@
         });
 
         /**
-         * Submit check-in data
+         * Submit check-in data (चेक-इन डेटा सबमिट करें)
          */
         async function submitCheckin() {
             if (!capturedPhotos.meterIn) {
@@ -704,7 +694,7 @@
                     showAlert('✅ Check-in successful!', 'success');
                     hideAllForms();
                     
-                    // Reset form
+                    // Reset form (फॉर्म रीसेट करें)
                     document.getElementById('customRoutePlan').value = '';
                     capturedPhotos.meterIn = null;
                     document.getElementById('meterInPreview').classList.add('hidden');
@@ -720,7 +710,7 @@
         }
 
         /**
-         * Submit check-out data
+         * Submit check-out data (चेक-आउट डेटा सबमिट करें)
          */
         async function submitCheckout() {
             if (!transportMethod) {
@@ -785,7 +775,7 @@
         }
 
         /**
-         * Reset checkout form
+         * Reset checkout form (चेकआउट फॉर्म रीसेट करें)
          */
         function resetCheckoutForm() {
             transportMethod = null;
@@ -800,7 +790,7 @@
             document.getElementById('meterOutPreview').classList.add('hidden');
             document.getElementById('ticketPreview').classList.add('hidden');
             
-            // Reset expense fields
+            // Reset expense fields (खर्च के फ़ील्ड रीसेट करें)
             document.getElementById('travelExpense').value = '';
             document.getElementById('foodExpense').value = '';
             document.getElementById('stayExpense').value = '';
@@ -808,7 +798,7 @@
         }
 
         /**
-         * Hide all forms
+         * Hide all forms (सभी फॉर्म छुपाएं)
          */
         function hideAllForms() {
             document.getElementById('checkinForm').classList.add('hidden');
@@ -816,7 +806,7 @@
         }
 
         /**
-         * Logout function
+         * Logout function (लॉगआउट फ़ंक्शन)
          */
         function logout() {
             if (typeof google !== 'undefined') {
@@ -837,7 +827,7 @@
         }
 
         /**
-         * Show alert message
+         * Show alert message (अलर्ट संदेश दिखाएं)
          */
         function showAlert(message, type = 'success') {
             const alertContainer = document.getElementById('alertContainer');
@@ -847,7 +837,7 @@
             
             alertContainer.appendChild(alertDiv);
             
-            // Auto remove after 5 seconds
+            // Auto remove after 5 seconds (5 सेकंड के बाद स्वतः हटा दें)
             setTimeout(() => {
                 if (alertDiv.parentNode) {
                     alertDiv.parentNode.removeChild(alertDiv);
@@ -856,14 +846,14 @@
         }
 
         /**
-         * Clear all alerts
+         * Clear all alerts (सभी अलर्ट साफ़ करें)
          */
         function clearAlerts() {
             document.getElementById('alertContainer').innerHTML = '';
         }
 
         /**
-         * Show loading state
+         * Show loading state (लोडिंग स्थिति दिखाएं)
          */
         function showLoading(message = 'Loading...') {
             const alertContainer = document.getElementById('alertContainer');
@@ -875,7 +865,7 @@
         }
 
         /**
-         * Hide loading state
+         * Hide loading state (लोडिंग स्थिति छुपाएं)
          */
         function hideLoading() {
             const alerts = document.querySelectorAll('.alert');
@@ -887,22 +877,22 @@
         }
 
         /**
-         * Check if user is on mobile device
+         * Check if user is on mobile device (जांचें कि उपयोगकर्ता मोबाइल डिवाइस पर है या नहीं)
          */
         function isMobileDevice() {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
 
         /**
-         * Initialize app on load
+         * Initialize app on load (लोड होने पर ऐप शुरू करें)
          */
         document.addEventListener('DOMContentLoaded', function() {
-            // Add mobile-specific enhancements
+            // Add mobile-specific enhancements (मोबाइल-विशिष्ट सुधार जोड़ें)
             if (isMobileDevice()) {
-                document.body.style.fontSize = '16px'; // Prevent zoom on input focus
+                document.body.style.fontSize = '16px';
             }
 
-            // Add service worker for offline capability (optional)
+            // Add service worker for offline capability (optional) (ऑफ़लाइन क्षमता के लिए सर्विस वर्कर जोड़ें (वैकल्पिक))
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/sw.js').catch(function(error) {
                     console.log('Service Worker registration failed:', error);
@@ -910,7 +900,7 @@
             }
         });
 
-        // Prevent form submission on Enter key (mobile keyboards)
+        // Prevent form submission on Enter key (mobile keyboards) (एंटर कुंजी पर फॉर्म सबमिशन को रोकें (मोबाइल कीबोर्ड))
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Enter' && event.target.tagName === 'INPUT') {
                 event.preventDefault();
