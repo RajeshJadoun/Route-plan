@@ -1,575 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marketing Team Check-in/Check-out</title>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <style>
-        /* ... CSS styles ... */
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketing Team Check-in/Check-out</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    /* ---- आपकी existing CSS पूरी रखी ---- */
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📍 Marketing Team</h1>
-            <p>Check-in/Check-out System</p>
-        </div>
-
-        <div class="content">
-            <div id="loginSection" class="login-section">
-                <h2>🔐 Login with Google</h2>
-                <p style="margin: 20px 0; color: #666;">Please login with your authorized Gmail account</p>
-                <div id="g_id_onload"
-                     data-client_id="206259846250-cbhaai1sf0f6abcfgk7g64iukecbs18p.apps.googleusercontent.com"
-                     data-context="signin"
-                     data-ux_mode="popup"
-                     data-callback="handleCredentialResponse"
-                     data-auto_prompt="false">
-                </div>
-                <div class="g_id_signin"
-                     data-type="standard"
-                     data-shape="pill"
-                     data-theme="filled_blue"
-                     data-text="signin_with"
-                     data-size="large"
-                     data-logo_alignment="left">
-                </div>
-            </div>
-
-            <div id="appSection" class="hidden">
-                <div class="user-info">
-                    <div class="welcome-text">
-                        Welcome, <span id="userName">User</span>! 👋
-                    </div>
-                    <button class="logout-btn" onclick="logout()">Logout</button>
-                </div>
-
-                <div class="route-plan">
-                    <h3>📋 Today's Route Plan</h3>
-                    <p id="routePlanText">Loading...</p>
-                </div>
-
-                <div class="action-buttons">
-                    <button class="btn btn-checkin" onclick="startCheckin()">
-                        🟢 Check-in
-                    </button>
-                    <button class="btn btn-checkout" onclick="startCheckout()">
-                        🔴 Check-out
-                    </button>
-                </div>
-
-                <div id="checkinForm" class="form-section hidden">
-                    <h3>🟢 Check-in Process</h3>
-                    
-                    <div class="form-group">
-                        <label for="customRoutePlan">Route Plan (if different from above):</label>
-                        <textarea id="customRoutePlan" placeholder="Enter custom route plan if needed..." rows="3"></textarea>
-                    </div>
-
-                    <div class="camera-section">
-                        <label>📸 Meter Reading Photo (Required):</label>
-                        <br>
-                        <button class="camera-btn" onclick="capturePhoto('meterIn')">
-                            📷 Capture Meter Reading
-                        </button>
-                        <br>
-                        <img id="meterInPreview" class="photo-preview hidden" alt="Meter Reading Preview">
-                    </div>
-
-                    <button class="submit-btn" onclick="submitCheckin()" id="checkinSubmitBtn">
-                        Submit Check-in
-                    </button>
-                </div>
-
-                <div id="checkoutForm" class="form-section hidden">
-                    <h3>🔴 Check-out Process</h3>
-                    
-                    <div class="form-group">
-                        <label>🚗 Transportation Method:</label>
-                        <div class="transport-options">
-                            <div class="transport-option" onclick="selectTransport('local')" id="localTransport">
-                                <strong>Local Vehicle</strong><br>
-                                <small>Meter Reading Required</small>
-                            </div>
-                            <div class="transport-option" onclick="selectTransport('public')" id="publicTransport">
-                                <strong>Public Transport</strong><br>
-                                <small>Ticket Photo Required</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="localVehicleSection" class="camera-section hidden">
-                        <label>📸 Meter Out Reading:</label>
-                        <br>
-                        <button class="camera-btn" onclick="capturePhoto('meterOut')">
-                            📷 Capture Meter Out
-                        </button>
-                        <br>
-                        <img id="meterOutPreview" class="photo-preview hidden" alt="Meter Out Preview">
-                    </div>
-
-                    <div id="publicTransportSection" class="camera-section hidden">
-                        <label>📸 Travel Ticket Photo:</label>
-                        <br>
-                        <button class="camera-btn" onclick="capturePhoto('ticket')">
-                            🎫 Capture Ticket
-                        </button>
-                        <br>
-                        <img id="ticketPreview" class="photo-preview hidden" alt="Ticket Preview">
-                    </div>
-
-                    <div class="form-group">
-                        <label>💰 Expense Details:</label>
-                        <div class="expense-form">
-                            <div class="form-group">
-                                <label for="travelExpense">Travel (₹):</label>
-                                <input type="number" id="travelExpense" placeholder="0" min="0" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label for="foodExpense">Food (₹):</label>
-                                <input type="number" id="foodExpense" placeholder="0" min="0" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label for="stayExpense">Stay (₹):</label>
-                                <input type="number" id="stayExpense" placeholder="0" min="0" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label for="otherExpense">Other (₹):</label>
-                                <input type="number" id="otherExpense" placeholder="0" min="0" step="0.01">
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="submit-btn" onclick="submitCheckout()" id="checkoutSubmitBtn">
-                        Submit Check-out
-                    </button>
-                </div>
-            </div>
-
-            <div id="alertContainer"></div>
-        </div>
+  <div class="container">
+    <div class="header">
+      <h1>📍 Marketing Team</h1>
+      <p>Check-in/Check-out System</p>
     </div>
 
-    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+    <div class="content">
+      <!-- Login Section -->
+      <div id="loginSection" class="login-section">
+        <h2>🔐 Login with Google</h2>
+        <p style="margin: 20px 0; color: #666;">Please login with your authorized Gmail account</p>
+        <div id="g_id_onload"
+             data-client_id="206259846250-cbhaai1sf0f6abcfgk7g64iukecbs18p.apps.googleusercontent.com"
+             data-context="signin"
+             data-ux_mode="popup"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin"
+             data-type="standard"
+             data-shape="pill"
+             data-theme="filled_blue"
+             data-text="signin_with"
+             data-size="large"
+             data-logo_alignment="left">
+        </div>
+      </div>
 
-    <script>
-        // Global variables (वैश्विक चर)
-        let currentUser = null;
-        let userCredential = null;
-        let currentPhotoType = null;
-        let transportMethod = null;
-        let capturedPhotos = {};
+      <!-- Main App Section -->
+      <div id="appSection" class="hidden">
+        <div class="user-info">
+          <div class="welcome-text">
+            Welcome, <span id="userName">User</span>! 👋
+          </div>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
 
-        // Google Apps Script Web App URL (Google Apps Script Web App URL)
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMPjHPJ9Su9Kz8uNoUsVjUrqGSwd-zIvLc4qVWXuVAWYMDsF-3w5RdGF4WgG-jp8eIu/exec';
+        <div class="route-plan">
+          <h3>📋 Today's Route Plan</h3>
+          <p id="routePlanText">Loading...</p>
+        </div>
 
-        // Initialize Google Sign-In (Google साइन-इन शुरू करें)
-        window.addEventListener('load', function() {
-            if (typeof google !== 'undefined') {
-                google.accounts.id.initialize({
-                    client_id: '206259846250-cbhaai1sf0f6abcfgk7g64iukecbs18p.apps.googleusercontent.com', // Replace with your Client ID (इसे अपनी Client ID से बदलें)
-                    callback: handleCredentialResponse
-                });
-            }
-        });
+        <div class="action-buttons">
+          <button class="btn btn-checkin" onclick="startCheckin()">🟢 Check-in</button>
+          <button class="btn btn-checkout" onclick="startCheckout()">🔴 Check-out</button>
+        </div>
 
-        /**
-         * Handle Google Sign-In response (Google साइन-इन प्रतिक्रिया को संभालें)
-         */
-        function handleCredentialResponse(response) {
-            showLoading('Verifying credentials...');
-            
-            userCredential = response.credential;
-            
-            // Decode JWT to get user info (उपयोगकर्ता की जानकारी पाने के लिए JWT को डिकोड करें)
-            try {
-                const payload = JSON.parse(atob(response.credential.split('.')[1]));
-                currentUser = {
-                    email: payload.email,
-                    name: payload.name,
-                    picture: payload.picture
-                };
+        <!-- Check-in Form -->
+        <div id="checkinForm" class="form-section hidden">
+          <h3>🟢 Check-in Process</h3>
+          <div class="form-group">
+            <label for="customRoutePlan">Route Plan (if different):</label>
+            <textarea id="customRoutePlan" placeholder="Enter custom route plan..." rows="3"></textarea>
+          </div>
+          <div class="camera-section">
+            <label>📸 Meter Reading Photo:</label><br>
+            <button class="camera-btn" onclick="capturePhoto('meterIn')">📷 Capture Meter</button><br>
+            <img id="meterInPreview" class="photo-preview hidden">
+          </div>
+          <button class="submit-btn" onclick="submitCheckin()" id="checkinSubmitBtn">Submit Check-in</button>
+        </div>
 
-                // Verify with backend (बैकएंड के साथ सत्यापित करें)
-                verifyUserAuthorization();
-            } catch (error) {
-                showAlert('Login failed: Invalid token', 'error');
-                hideLoading();
-            }
+        <!-- Checkout Form -->
+        <div id="checkoutForm" class="form-section hidden">
+          <h3>🔴 Check-out Process</h3>
+          <div class="form-group">
+            <label>🚗 Transportation Method:</label>
+            <div class="transport-options">
+              <div class="transport-option" onclick="selectTransport('local')" id="localTransport">
+                <strong>Local Vehicle</strong><br><small>Meter Required</small>
+              </div>
+              <div class="transport-option" onclick="selectTransport('public')" id="publicTransport">
+                <strong>Public Transport</strong><br><small>Ticket Required</small>
+              </div>
+            </div>
+          </div>
+          <div id="localVehicleSection" class="camera-section hidden">
+            <label>📸 Meter Out:</label><br>
+            <button class="camera-btn" onclick="capturePhoto('meterOut')">📷 Capture Meter Out</button><br>
+            <img id="meterOutPreview" class="photo-preview hidden">
+          </div>
+          <div id="publicTransportSection" class="camera-section hidden">
+            <label>📸 Travel Ticket:</label><br>
+            <button class="camera-btn" onclick="capturePhoto('ticket')">🎫 Capture Ticket</button><br>
+            <img id="ticketPreview" class="photo-preview hidden">
+          </div>
+          <div class="form-group">
+            <label>💰 Expenses:</label>
+            <div class="expense-form">
+              <input type="number" id="travelExpense" placeholder="Travel ₹">
+              <input type="number" id="foodExpense" placeholder="Food ₹">
+              <input type="number" id="stayExpense" placeholder="Stay ₹">
+              <input type="number" id="otherExpense" placeholder="Other ₹">
+            </div>
+          </div>
+          <button class="submit-btn" onclick="submitCheckout()" id="checkoutSubmitBtn">Submit Check-out</button>
+        </div>
+      </div>
+
+      <div id="alertContainer"></div>
+    </div>
+  </div>
+
+  <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;">
+
+  <script>
+    let currentUser = null;
+    let userCredential = null;
+    let capturedPhotos = {};
+    let currentPhotoType = null;
+    let transportMethod = null;
+
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwMPjHPYSu9Kz8uNoUsVjUrqGSwd-zIvLc4qVWXuVAWYMDsF-3w5RdGF4WgG-jp8eIu/exec";
+
+    function handleCredentialResponse(response) {
+      const payload = JSON.parse(atob(response.credential.split('.')[1]));
+      currentUser = { email: payload.email, name: payload.name };
+      verifyUserAuthorization();
+    }
+
+    async function verifyUserAuthorization() {
+      const res = await fetch(`${SCRIPT_URL}?action=getUserInfo&email=${currentUser.email}`);
+      const result = await res.json();
+      if (result.status === 200) {
+        currentUser.displayName = result.data.name;
+        currentUser.routePlan = result.data.routePlan;
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('appSection').classList.remove('hidden');
+        document.getElementById('userName').textContent = currentUser.displayName;
+        document.getElementById('routePlanText').textContent = currentUser.routePlan;
+      } else {
+        alert("Unauthorized user!");
+      }
+    }
+
+    function startCheckin() {
+      document.getElementById('checkinForm').classList.remove('hidden');
+      document.getElementById('checkoutForm').classList.add('hidden');
+    }
+
+    function startCheckout() {
+      document.getElementById('checkoutForm').classList.remove('hidden');
+      document.getElementById('checkinForm').classList.add('hidden');
+    }
+
+    function selectTransport(method) {
+      transportMethod = method;
+      document.getElementById('localVehicleSection').classList.add('hidden');
+      document.getElementById('publicTransportSection').classList.add('hidden');
+      if (method === 'local') document.getElementById('localVehicleSection').classList.remove('hidden');
+      if (method === 'public') document.getElementById('publicTransportSection').classList.remove('hidden');
+    }
+
+    function capturePhoto(type) {
+      currentPhotoType = type;
+      document.getElementById('cameraInput').click();
+    }
+
+    document.getElementById('cameraInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = ev => {
+        capturedPhotos[currentPhotoType] = ev.target.result;
+        document.getElementById(currentPhotoType + "Preview").src = ev.target.result;
+        document.getElementById(currentPhotoType + "Preview").classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    async function submitCheckin() {
+      if (!capturedPhotos.meterIn) return alert("Please capture meter photo!");
+      const payload = {
+        action: "checkin",
+        payload: {
+          name: currentUser.displayName,
+          email: currentUser.email,
+          routePlan: document.getElementById('customRoutePlan').value || currentUser.routePlan,
+          meterInPhoto: capturedPhotos.meterIn
         }
+      };
+      const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+      const result = await res.json();
+      alert(result.data || result.message);
+    }
 
-        /**
-         * Verify user authorization with backend (बैकएंड के साथ उपयोगकर्ता प्राधिकरण को सत्यापित करें)
-         */
-        async function verifyUserAuthorization() {
-            try {
-                const response = await fetch(`${SCRIPT_URL}?action=getUserInfo&email=${currentUser.email}`);
-                const result = await response.json();
-
-                hideLoading();
-
-                if (result.status === 200) {
-                    // User is authorized (उपयोगकर्ता अधिकृत है)
-                    currentUser.displayName = result.data.name || currentUser.name;
-                    currentUser.routePlan = result.data.routePlan;
-                    
-                    showMainApp();
-                    showAlert('Login successful! Welcome back.', 'success');
-                } else {
-                    showAlert('Access denied: You are not authorized to use this application.', 'error');
-                }
-            } catch (error) {
-                hideLoading();
-                showAlert('Login verification failed: ' + error.message, 'error');
-            }
+    async function submitCheckout() {
+      const payload = {
+        action: "checkout",
+        payload: {
+          name: currentUser.displayName,
+          email: currentUser.email,
+          routePlan: currentUser.routePlan,
+          meterOutPhoto: capturedPhotos.meterOut || "",
+          ticketPhoto: capturedPhotos.ticket || "",
+          travelExpense: document.getElementById('travelExpense').value || 0,
+          foodExpense: document.getElementById('foodExpense').value || 0,
+          stayExpense: document.getElementById('stayExpense').value || 0,
+          otherExpense: document.getElementById('otherExpense').value || 0,
+          transportMethod
         }
+      };
+      const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+      const result = await res.json();
+      alert(result.data || result.message);
+    }
 
-        /**
-         * Show main application (मुख्य एप्लिकेशन दिखाएं)
-         */
-        function showMainApp() {
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('appSection').classList.remove('hidden');
-            
-            // Update user info (उपयोगकर्ता की जानकारी अपडेट करें)
-            document.getElementById('userName').textContent = currentUser.displayName;
-            document.getElementById('routePlanText').textContent = currentUser.routePlan;
-        }
-
-        /**
-         * Start check-in process (चेक-इन प्रक्रिया शुरू करें)
-         */
-        function startCheckin() {
-            hideAllForms();
-            document.getElementById('checkinForm').classList.remove('hidden');
-            
-            // Pre-fill route plan if available (यदि उपलब्ध हो तो रूट प्लान पहले से भरें)
-            if (currentUser.routePlan && currentUser.routePlan !== 'No Route Plan assigned.') {
-                document.getElementById('customRoutePlan').placeholder = `Current: ${currentUser.routePlan}`;
-            }
-        }
-
-        /**
-         * Start check-out process (चेक-आउट प्रक्रिया शुरू करें)
-         */
-        function startCheckout() {
-            hideAllForms();
-            document.getElementById('checkoutForm').classList.remove('hidden');
-            transportMethod = null;
-            
-            // Reset transport selection (परिवहन चयन रीसेट करें)
-            document.getElementById('localTransport').classList.remove('selected');
-            document.getElementById('publicTransport').classList.remove('selected');
-            document.getElementById('localVehicleSection').classList.add('hidden');
-            document.getElementById('publicTransportSection').classList.add('hidden');
-        }
-
-        /**
-         * Select transport method (परिवहन विधि चुनें)
-         */
-        function selectTransport(method) {
-            transportMethod = method;
-            
-            // Update UI (UI अपडेट करें)
-            document.getElementById('localTransport').classList.remove('selected');
-            document.getElementById('publicTransport').classList.remove('selected');
-            document.getElementById('localVehicleSection').classList.add('hidden');
-            document.getElementById('publicTransportSection').classList.add('hidden');
-
-            if (method === 'local') {
-                document.getElementById('localTransport').classList.add('selected');
-                document.getElementById('localVehicleSection').classList.remove('hidden');
-            } else if (method === 'public') {
-                document.getElementById('publicTransport').classList.add('selected');
-                document.getElementById('publicTransportSection').classList.remove('hidden');
-            }
-        }
-
-        /**
-         * Capture photo using camera (कैमरा का उपयोग करके फोटो कैप्चर करें)
-         */
-        function capturePhoto(type) {
-            currentPhotoType = type;
-            document.getElementById('cameraInput').click();
-        }
-
-        // Handle photo capture (फोटो कैप्चर को संभालें)
-        document.getElementById('cameraInput').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const base64Data = e.target.result;
-                    capturedPhotos[currentPhotoType] = base64Data;
-                    
-                    // Show preview (पूर्वावलोकन दिखाएं)
-                    const previewId = currentPhotoType + 'Preview';
-                    const previewImg = document.getElementById(previewId);
-                    if (previewImg) {
-                        previewImg.src = base64Data;
-                        previewImg.classList.remove('hidden');
-                    }
-                    
-                    showAlert(`📸 ${currentPhotoType} photo captured successfully!`, 'success');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        /**
-         * Submit check-in data (चेक-इन डेटा सबमिट करें)
-         */
-        async function submitCheckin() {
-            if (!capturedPhotos.meterIn) {
-                showAlert('Please capture meter reading photo first!', 'error');
-                return;
-            }
-
-            const submitBtn = document.getElementById('checkinSubmitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="loading"></span> Submitting...';
-
-            try {
-                const customRoute = document.getElementById('customRoutePlan').value.trim();
-                const routePlan = customRoute || currentUser.routePlan;
-
-                const payload = {
-                    idToken: userCredential,
-                    action: 'checkin',
-                    payload: {
-                        name: currentUser.displayName,
-                        routePlan: routePlan,
-                        meterInPhoto: capturedPhotos.meterIn
-                    }
-                };
-
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-
-                if (result.status === 200) {
-                    showAlert('✅ Check-in successful!', 'success');
-                    hideAllForms();
-                    
-                    // Reset form (फॉर्म रीसेट करें)
-                    document.getElementById('customRoutePlan').value = '';
-                    capturedPhotos.meterIn = null;
-                    document.getElementById('meterInPreview').classList.add('hidden');
-                } else {
-                    showAlert('Check-in failed: ' + result.message, 'error');
-                }
-            } catch (error) {
-                showAlert('Check-in error: ' + error.message, 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Submit Check-in';
-            }
-        }
-
-        /**
-         * Submit check-out data (चेक-आउट डेटा सबमिट करें)
-         */
-        async function submitCheckout() {
-            if (!transportMethod) {
-                showAlert('Please select transportation method!', 'error');
-                return;
-            }
-
-            if (transportMethod === 'local' && !capturedPhotos.meterOut) {
-                showAlert('Please capture meter out reading photo!', 'error');
-                return;
-            }
-
-            if (transportMethod === 'public' && !capturedPhotos.ticket) {
-                showAlert('Please capture ticket photo!', 'error');
-                return;
-            }
-
-            const submitBtn = document.getElementById('checkoutSubmitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="loading"></span> Submitting...';
-
-            try {
-                const payload = {
-                    idToken: userCredential,
-                    action: 'checkout',
-                    payload: {
-                        name: currentUser.displayName,
-                        routePlan: currentUser.routePlan,
-                        meterOutPhoto: capturedPhotos.meterOut || '',
-                        ticketPhoto: capturedPhotos.ticket || '',
-                        travelExpense: document.getElementById('travelExpense').value || 0,
-                        foodExpense: document.getElementById('foodExpense').value || 0,
-                        stayExpense: document.getElementById('stayExpense').value || 0,
-                        otherExpense: document.getElementById('otherExpense').value || 0,
-                        transportMethod: transportMethod
-                    }
-                };
-
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-
-                if (result.status === 200) {
-                    showAlert('✅ Check-out successful!', 'success');
-                    hideAllForms();
-                    resetCheckoutForm();
-                } else {
-                    showAlert('Check-out failed: ' + result.message, 'error');
-                }
-            } catch (error) {
-                showAlert('Check-out error: ' + error.message, 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Submit Check-out';
-            }
-        }
-
-        /**
-         * Reset checkout form (चेकआउट फॉर्म रीसेट करें)
-         */
-        function resetCheckoutForm() {
-            transportMethod = null;
-            capturedPhotos.meterOut = null;
-            capturedPhotos.ticket = null;
-            
-            document.getElementById('localTransport').classList.remove('selected');
-            document.getElementById('publicTransport').classList.remove('selected');
-            document.getElementById('localVehicleSection').classList.add('hidden');
-            document.getElementById('publicTransportSection').classList.add('hidden');
-            
-            document.getElementById('meterOutPreview').classList.add('hidden');
-            document.getElementById('ticketPreview').classList.add('hidden');
-            
-            // Reset expense fields (खर्च के फ़ील्ड रीसेट करें)
-            document.getElementById('travelExpense').value = '';
-            document.getElementById('foodExpense').value = '';
-            document.getElementById('stayExpense').value = '';
-            document.getElementById('otherExpense').value = '';
-        }
-
-        /**
-         * Hide all forms (सभी फॉर्म छुपाएं)
-         */
-        function hideAllForms() {
-            document.getElementById('checkinForm').classList.add('hidden');
-            document.getElementById('checkoutForm').classList.add('hidden');
-        }
-
-        /**
-         * Logout function (लॉगआउट फ़ंक्शन)
-         */
-        function logout() {
-            if (typeof google !== 'undefined') {
-                google.accounts.id.disableAutoSelect();
-            }
-            
-            currentUser = null;
-            userCredential = null;
-            capturedPhotos = {};
-            
-            document.getElementById('appSection').classList.add('hidden');
-            document.getElementById('loginSection').classList.remove('hidden');
-            
-            hideAllForms();
-            clearAlerts();
-            
-            showAlert('Logged out successfully', 'success');
-        }
-
-        /**
-         * Show alert message (अलर्ट संदेश दिखाएं)
-         */
-        function showAlert(message, type = 'success') {
-            const alertContainer = document.getElementById('alertContainer');
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.textContent = message;
-            
-            alertContainer.appendChild(alertDiv);
-            
-            // Auto remove after 5 seconds (5 सेकंड के बाद स्वतः हटा दें)
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.parentNode.removeChild(alertDiv);
-                }
-            }, 5000);
-        }
-
-        /**
-         * Clear all alerts (सभी अलर्ट साफ़ करें)
-         */
-        function clearAlerts() {
-            document.getElementById('alertContainer').innerHTML = '';
-        }
-
-        /**
-         * Show loading state (लोडिंग स्थिति दिखाएं)
-         */
-        function showLoading(message = 'Loading...') {
-            const alertContainer = document.getElementById('alertContainer');
-            alertContainer.innerHTML = `
-                <div class="alert" style="background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb;">
-                    <span class="loading"></span> ${message}
-                </div>
-            `;
-        }
-
-        /**
-         * Hide loading state (लोडिंग स्थिति छुपाएं)
-         */
-        function hideLoading() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                if (alert.textContent.includes('Loading') || alert.textContent.includes('Verifying')) {
-                    alert.remove();
-                }
-            });
-        }
-
-        /**
-         * Check if user is on mobile device (जांचें कि उपयोगकर्ता मोबाइल डिवाइस पर है या नहीं)
-         */
-        function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
-        /**
-         * Initialize app on load (लोड होने पर ऐप शुरू करें)
-         */
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add mobile-specific enhancements (मोबाइल-विशिष्ट सुधार जोड़ें)
-            if (isMobileDevice()) {
-                document.body.style.fontSize = '16px';
-            }
-
-            // Add service worker for offline capability (optional) (ऑफ़लाइन क्षमता के लिए सर्विस वर्कर जोड़ें (वैकल्पिक))
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js').catch(function(error) {
-                    console.log('Service Worker registration failed:', error);
-                });
-            }
-        });
-
-        // Prevent form submission on Enter key (mobile keyboards) (एंटर कुंजी पर फॉर्म सबमिशन को रोकें (मोबाइल कीबोर्ड))
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter' && event.target.tagName === 'INPUT') {
-                event.preventDefault();
-            }
-        });
-    </script>
+    function logout() {
+      google.accounts.id.disableAutoSelect();
+      location.reload();
+    }
+  </script>
 </body>
 </html>
