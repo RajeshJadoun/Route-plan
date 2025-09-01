@@ -498,13 +498,13 @@
         let capturedPhotos = {};
 
         // Google Apps Script Web App URL (Google Apps Script Web App URL)
-        const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMPjHPYSu9Kz8uNoUsVjUrqGSwd-zIvLc4qVWXuVAWYMDsF-3w5RdGF4WgG-jp8eIu/exec';
 
         // Initialize Google Sign-In (Google साइन-इन शुरू करें)
         window.addEventListener('load', function() {
             if (typeof google !== 'undefined') {
                 google.accounts.id.initialize({
-                    client_id: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your Client ID (इसे अपनी Client ID से बदलें)
+                    client_id: 'YOUR_GOOGLE_CLIENT_ID', //206259846250-cbhaai1sf0f6abcfgk7g64iukecbs18p.apps.googleusercontent.com"
                     callback: handleCredentialResponse
                 });
             }
